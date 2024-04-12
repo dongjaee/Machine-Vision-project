@@ -89,8 +89,8 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
 
-                      Expanded(
-                        flex: 1,
+                      Container(
+                        height:600,
                         child: ListView.builder(
                           itemCount: 3, // 채팅 메시지의 수
                           itemBuilder: (context, index) {
@@ -102,41 +102,72 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.only(top:16.0),
                         child: Row(
                           children: <Widget>[
                             Expanded(
-                              flex:1,
+                              flex: 3,
                               child: Container(
-                                margin: EdgeInsets.only(left: 40.0,right:10),
-                                child: ElevatedButton.icon(
-                                  icon: Icon(Icons.upload_file), // 버튼에 아이콘 추가
-                                  label: Text('동영상 업로드'),
-                                  onPressed: () {
-                                    // 동영상 업로드 버튼 이벤트 처리
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    minimumSize: Size(double.infinity, 63), // 버튼 높이 설정
-                                    shape: RoundedRectangleBorder( // 모양 설정
-                                      borderRadius: BorderRadius.circular(10), // 둥근 모서리의 radius
+                                margin: EdgeInsets.only(left: 200.0, right: 15),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('동영상 업로드', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 8),
+                                    ElevatedButton.icon(
+                                      icon: Icon(Icons.upload_file, color: Colors.blue, size: 24), // 아이콘 사이즈 조정
+                                      label: SizedBox.shrink(), // 레이블 대신에 빈 SizedBox 사용
+                                      onPressed: () {
+                                        // 동영상 업로드 버튼 이벤트 처리
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor: MaterialStateProperty.all(Colors.white),
+                                        foregroundColor: MaterialStateProperty.all(Colors.blue),
+                                        elevation: MaterialStateProperty.all(0),
+                                        padding: MaterialStateProperty.all(EdgeInsets.zero), // 버튼 내부 여백을 제거
+                                        minimumSize: MaterialStateProperty.all(Size(200, 56)), // 버튼의 높이와 너비를 조정
+                                        shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                            side: BorderSide(color: Color(0xFF8B8B8B)),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    padding: EdgeInsets.symmetric(horizontal: 0), // 버튼 내부 여백 제거
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
                             Expanded(
-                              flex:4,
+                              flex: 7,
                               child: Container(
-                                margin: EdgeInsets.only(right: 40.0,left:10),
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder( // 경계선 설정
-                                      borderRadius: BorderRadius.circular(10), // 둥근 모서리의 radius
+                                margin: EdgeInsets.only(right: 200.0, left: 15),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    SizedBox(height: 8),
+                                    TextField(
+                                      decoration: InputDecoration(
+                                        isDense: true, // 필드의 높이를 줄임
+                                        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // 좌우 패딩을 추가
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          borderSide: BorderSide(color: Color(0xFF8B8B8B)),
+                                        ),
+                                        hintText: '',
+                                        suffixIcon: IconButton(
+                                          icon: Icon(Icons.add_box_outlined, color: Colors.blue, size: 24), // 아이콘 크기를 조정
+                                          onPressed: () {
+                                            //TODO: sendMessage 구현
+                                          },
+                                          constraints: BoxConstraints(), // IconButton의 크기를 제한하지 않음
+                                        ),
+                                      ),
                                     ),
-                                    labelText: '탐지할 객체를 입력해주세요', // 라벨 텍스트 추가
-                                    suffixIcon: Icon(Icons.search), // 검색 아이콘 추가
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
