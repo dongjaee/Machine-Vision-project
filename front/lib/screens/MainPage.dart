@@ -19,6 +19,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double textSize = screenWidth < 970 ? 12 : 16;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -118,7 +119,7 @@ class _MainPageState extends State<MainPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('동영상 업로드', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text('동영상 업로드', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
                                   SizedBox(height: 8),
                                   ElevatedButton.icon(
                                     icon: Icon(Icons.upload_file, color: Colors.blue, size: 24), // 아이콘 사이즈 조정
@@ -152,7 +153,7 @@ class _MainPageState extends State<MainPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
                                   SizedBox(height: 8),
                                   TextField(
                                     decoration: InputDecoration(
