@@ -17,6 +17,9 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       key: _scaffoldKey,
       endDrawer: Drawer(
@@ -52,8 +55,9 @@ class _MainPageState extends State<MainPage> {
         children: <Widget>[
           Row(
             children: <Widget>[
+              //왼쪽메뉴
               Flexible(
-                flex: 2,
+                flex: 1,
                 child: Container(
                   color: colorLeftBg,
                   child: ListView(
@@ -71,8 +75,9 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
               ),
+              //메인 컨텐츠 영역
               Flexible(
-                flex: 8,
+                flex: 4,
                 child: Container(
                   color: Colors.white,
                   child: Column(
@@ -88,91 +93,90 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                       ),
-
-                      Container(
-                        height:600,
-                        child: ListView.builder(
-                          itemCount: 3, // 채팅 메시지의 수
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text('메시지 #$index'),
-                              subtitle: Text('Yellow filling'),
-                            );
-                          },
+                      SizedBox(height:50),
+                      Center(
+                        child: Container(
+                          height: screenHeight * 0.55, // 높이 지정
+                          width: screenWidth * 0.55, // 너비 지정
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                          child: Center(
+                            child: Text("동영상"),
+                          ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top:16.0),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 3,
-                              child: Container(
-                                margin: EdgeInsets.only(left: 200.0, right: 15),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('동영상 업로드', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    SizedBox(height: 8),
-                                    ElevatedButton.icon(
-                                      icon: Icon(Icons.upload_file, color: Colors.blue, size: 24), // 아이콘 사이즈 조정
-                                      label: SizedBox.shrink(), // 레이블 대신에 빈 SizedBox 사용
-                                      onPressed: () {
-                                        // 동영상 업로드 버튼 이벤트 처리
-                                      },
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all(Colors.white),
-                                        foregroundColor: MaterialStateProperty.all(Colors.blue),
-                                        elevation: MaterialStateProperty.all(0),
-                                        padding: MaterialStateProperty.all(EdgeInsets.zero), // 버튼 내부 여백을 제거
-                                        minimumSize: MaterialStateProperty.all(Size(200, 56)), // 버튼의 높이와 너비를 조정
-                                        shape: MaterialStateProperty.all(
-                                          RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10),
-                                            side: BorderSide(color: Color(0xFF8B8B8B)),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 7,
-                              child: Container(
-                                margin: EdgeInsets.only(right: 200.0, left: 15),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    SizedBox(height: 8),
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        isDense: true, // 필드의 높이를 줄임
-                                        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // 좌우 패딩을 추가
-                                        border: OutlineInputBorder(
+                      SizedBox(height:50),
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            flex: 3,
+                            child: Container(
+                              margin: EdgeInsets.only(left: (screenWidth * 0.125) ,right:16), // right 고민
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('동영상 업로드', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 8),
+                                  ElevatedButton.icon(
+                                    icon: Icon(Icons.upload_file, color: Colors.blue, size: 24), // 아이콘 사이즈 조정
+                                    label: SizedBox.shrink(), // 레이블 대신에 빈 SizedBox 사용
+                                    onPressed: () {
+                                      // 동영상 업로드 버튼 이벤트 처리
+                                    },
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                                      foregroundColor: MaterialStateProperty.all(Colors.blue),
+                                      elevation: MaterialStateProperty.all(0),
+                                      padding: MaterialStateProperty.all(EdgeInsets.zero), // 버튼 내부 여백을 제거
+                                      minimumSize: MaterialStateProperty.all(Size(200, 56)), // 버튼의 높이와 너비를 조정
+                                      shape: MaterialStateProperty.all(
+                                        RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10),
-                                          borderSide: BorderSide(color: Color(0xFF8B8B8B)),
-                                        ),
-                                        hintText: '',
-                                        suffixIcon: IconButton(
-                                          icon: Icon(Icons.add_box_outlined, color: Colors.blue, size: 24), // 아이콘 크기를 조정
-                                          onPressed: () {
-                                            //TODO: sendMessage 구현
-                                          },
-                                          constraints: BoxConstraints(), // IconButton의 크기를 제한하지 않음
+                                          side: BorderSide(color: Color(0xFF8B8B8B)),
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          Flexible(
+                            flex: 7,
+                            child: Container(
+                              margin: EdgeInsets.only(left:16,right:(screenWidth * 0.125)), //left 고민
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 8),
+                                  TextField(
+                                    decoration: InputDecoration(
+                                      isDense: true, // 필드의 높이를 줄임
+                                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // 좌우 패딩을 추가
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        borderSide: BorderSide(color: Color(0xFF8B8B8B)),
+                                      ),
+                                      hintText: '',
+                                      suffixIcon: IconButton(
+                                        icon: Icon(Icons.add_box_outlined, color: Colors.blue, size: 24), // 아이콘 크기를 조정
+                                        onPressed: () {
+                                          //TODO: sendMessage 구현
+                                        },
+                                        constraints: BoxConstraints(), // IconButton의 크기를 제한하지 않음
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
