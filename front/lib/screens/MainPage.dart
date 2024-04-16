@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+
 import 'package:front/designs/SettingButtons.dart';
 import 'package:front/designs/SettingColor.dart';
+import 'package:front/functions/PlayingVideo.dart';
+
+import 'dart:typed_data';
+import 'dart:html' as html;
+import 'package:video_player/video_player.dart';
+import 'package:file_picker/file_picker.dart';
+
+
 
 class MainPage extends StatefulWidget {
   @override
@@ -8,12 +17,39 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // 이곳에서 상태를 관리합니다. 예를 들어, 채팅 메시지 목록을 저장할 수 있습니다.
+  // 상태 관리. 예를 들어, 채팅 메시지 목록을 저장할 수 있습니다.
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? videoUrl; // 동영상 URL
+  Uint8List? videoBytes; // 동영상 Bytes
+
+  Future<void> pickVideo() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      withData: true, // 파일의 바이트 데이터를 함께 가져오도록 설정합니다.
+    );
+
+    if (result != null) {
+      // 바이트 데이터로부터 Blob 객체를 생성합니다.
+      final blob = html.Blob([result.files.single.bytes!]);
+      // Blob으로부터 임시 URL을 생성합니다.
+      final url = html.Url.createObjectUrl(blob);
+
+      setState(() {
+        videoUrl = url; // 임시 URL을 videoUrl에 저장
+      });
+
+      // 선택된 파일의 이름과 생성된 임시 URL을 출력하여 확인합니다.
+      print('선택된 파일: ${result.files.single.name}, 임시 URL: $videoUrl');
+    }
+  }
+
+
 
   void _openEndDrawer() {
     _scaffoldKey.currentState?.openEndDrawer();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,9 +139,14 @@ class _MainPageState extends State<MainPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: Center(
-                            child: Text("동영상"),
-                          ),
+                          child: videoUrl != null
+                              ? PlayingVideo(videoUrl: videoUrl!) // 선택된 동영상 재생
+                              : Center(
+                                  child: Text(
+                                    "동영상 재생", // default message
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                         ),
                       ),
                       SizedBox(height:50),
@@ -124,9 +165,7 @@ class _MainPageState extends State<MainPage> {
                                   ElevatedButton.icon(
                                     icon: Icon(Icons.upload_file, color: Colors.blue, size: 24), // 아이콘 사이즈 조정
                                     label: SizedBox.shrink(), // 레이블 대신에 빈 SizedBox 사용
-                                    onPressed: () {
-                                      // 동영상 업로드 버튼 이벤트 처리
-                                    },
+                                    onPressed: pickVideo,
                                     style: ButtonStyle(
                                       backgroundColor: MaterialStateProperty.all(Colors.white),
                                       foregroundColor: MaterialStateProperty.all(Colors.blue),
