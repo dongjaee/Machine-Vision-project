@@ -7,7 +7,7 @@ import 'dart:io';
 
 class ApiService {
   Future<void> uploadVideo(Uint8List fileBytes, String fileName) async {
-    var uri = Uri.parse('http://yourserver.com/upload-video/');
+    var uri = Uri.parse('http://localhost:8000/upload_video/');
     var request = http.MultipartRequest('POST', uri)
       ..files.add(http.MultipartFile.fromBytes(
         'video', // 서버에서 기대하는 필드 이름
