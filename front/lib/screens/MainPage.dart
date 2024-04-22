@@ -1,11 +1,14 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 
 import 'package:front/designs/SettingButtons.dart';
 import 'package:front/designs/SettingColor.dart';
 import 'package:front/functions/PlayingVideo.dart';
+import 'package:front/functions/ApiService.dart';
 
 import 'dart:typed_data';
-import 'dart:html' as html;
+import 'dart:html';
 import 'package:video_player/video_player.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -22,34 +25,47 @@ class _MainPageState extends State<MainPage> {
   String? videoUrl; // 동영상 URL
   Uint8List? videoBytes; // 동영상 Bytes
 
+  // Future<void> pickVideo() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
+  //     type: FileType.any,
+  //     withData: true, // 파일의 바이트 데이터를 함께 가져오도록 설정합니다.
+  //   );
+  //
+  //   if (result != null) {
+  //     // 바이트 데이터로부터 Blob 객체를 생성합니다.
+  //     final blob = html.Blob([result.files.single.bytes!]);
+  //     // Blob으로부터 임시 URL을 생성합니다.
+  //     final url = html.Url.createObjectUrl(blob);
+  //
+  //     setState(() {
+  //       videoUrl = url; // 임시 URL을 videoUrl에 저장
+  //     });
+  //
+  //     // 선택된 파일의 이름과 생성된 임시 URL을 출력하여 확인합니다.
+  //     print('선택된 파일: ${result.files.single.name}, 임시 URL: $videoUrl');
+  //   }
+  // }
   Future<void> pickVideo() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      withData: true, // 파일의 바이트 데이터를 함께 가져오도록 설정합니다.
+      type: FileType.video,
+      withData: true, // 파일의 바이트 데이터를 가져오도록 설정
     );
 
-    if (result != null) {
-      // 바이트 데이터로부터 Blob 객체를 생성합니다.
-      final blob = html.Blob([result.files.single.bytes!]);
-      // Blob으로부터 임시 URL을 생성합니다.
-      final url = html.Url.createObjectUrl(blob);
+    if (result != null && result.files.single.bytes != null) {
+      Uint8List fileBytes = result.files.single.bytes!;
+      String fileName = result.files.single.name;
 
-      setState(() {
-        videoUrl = url; // 임시 URL을 videoUrl에 저장
-      });
+      // ApiService의 uploadVideo 함수 호출
+      await ApiService().uploadVideo(fileBytes, fileName);
 
-      // 선택된 파일의 이름과 생성된 임시 URL을 출력하여 확인합니다.
-      print('선택된 파일: ${result.files.single.name}, 임시 URL: $videoUrl');
+      // 선택된 파일의 이름을 출력하여 확인합니다.
+      print('선택된 파일: $fileName');
     }
   }
-
-
 
   void _openEndDrawer() {
     _scaffoldKey.currentState?.openEndDrawer();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +155,14 @@ class _MainPageState extends State<MainPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: videoUrl != null
-                              ? PlayingVideo(videoUrl: videoUrl!) // 선택된 동영상 재생
-                              : Center(
-                                  child: Text(
-                                    "동영상 재생", // default message
-                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
+                          //child: videoUrl != null
+                              //? PlayingVideo(videoUrl: videoUrl!) // 선택된 동영상 재생
+                              //: Center(
+                              //    child: Text(
+                              //      "동영상 재생", // default message
+                              //      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              //    ),
+                              //  ),
                         ),
                       ),
                       SizedBox(height:50),
