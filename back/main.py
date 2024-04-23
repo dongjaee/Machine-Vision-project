@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List
 import shutil
@@ -19,13 +20,25 @@ app.add_middleware(
     allow_headers=["*"],     # 허용할 HTTP Header 목록
 )
 
+#정적 파일 디렉토리 설정
+app.mount('/video',StaticFiles(directory='video'),name='video')
+
 @app.post("/upload_video/")
 async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_db)):
     video_name = video.filename
-    video_url = f"http://yourdomain.com/uploaded_videos/{video_name}"  # 접근 가능한 URL 형식으로 변경해야 합니다.
+    video_path = f"video/{video_name}"
+    video_url = f"http://localhost:8000/video/{video_name}"  
 
     try:
-        video_entry = create_video(db=db, video_name=video_name, video_url=video_url)
+        # 비디오 파일을 디렉토리에 저장
+        with open(video_path, "wb+") as file_object:
+            file_object.write(await video.read())
+
+        # 비디오 데이터베이스 항목 생성
+        video_entry = Video(videoName=video_name, videoURL=video_url)
+        db.add(video_entry)
+        db.commit()
+        db.refresh(video_entry)
         return {
             "videoName": video_entry.videoName,
             "videoURL": video_entry.videoURL,
