@@ -20,10 +20,23 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // 상태 관리. 예를 들어, 채팅 메시지 목록을 저장할 수 있습니다.
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? videoUrl; // 동영상 URL
   Uint8List? videoBytes; // 동영상 Bytes
+
+  final List<String> detectObjects = []; // 탐지할 객체 저장
+  final TextEditingController textEditingController = TextEditingController();
+
+  void addObject(String object) {
+    if (object.isNotEmpty) {
+      setState(() {
+        detectObjects.clear(); // 리스트 초기화
+        detectObjects.add(object);
+        textEditingController.clear();  // 텍스트 필드 초기화
+      });
+      debugPrint('List updated: $detectObjects');
+    }
+  }
 
   // Future<void> pickVideo() async {
   //   FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -55,10 +68,7 @@ class _MainPageState extends State<MainPage> {
       Uint8List fileBytes = result.files.single.bytes!;
       String fileName = result.files.single.name;
 
-      // ApiService의 uploadVideo 함수 호출
       await ApiService().uploadVideo(fileBytes, fileName);
-
-      // 선택된 파일의 이름을 출력하여 확인합니다.
       print('선택된 파일: $fileName');
     }
   }
@@ -209,9 +219,10 @@ class _MainPageState extends State<MainPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('탐지할 객체를 입력해주세요', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 8),
-                                  TextField(
-                                    decoration: InputDecoration(
+                                    SizedBox(height: 8),
+                                    TextField(
+                                      controller: textEditingController,
+                                      decoration: InputDecoration(
                                       isDense: true, // 필드의 높이를 줄임
                                       contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // 좌우 패딩을 추가
                                       border: OutlineInputBorder(
@@ -222,11 +233,12 @@ class _MainPageState extends State<MainPage> {
                                       suffixIcon: IconButton(
                                         icon: Icon(Icons.add_box_outlined, color: Colors.blue, size: 24), // 아이콘 크기를 조정
                                         onPressed: () {
-                                          //TODO: sendMessage 구현
+                                          addObject(textEditingController.text);
                                         },
                                         constraints: BoxConstraints(), // IconButton의 크기를 제한하지 않음
                                       ),
                                     ),
+                                    onSubmitted: addObject,
                                   ),
                                 ],
                               ),
