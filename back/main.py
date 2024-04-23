@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Depends, HTTPException
+from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -23,6 +23,7 @@ app.add_middleware(
 #정적 파일 디렉토리 설정
 app.mount('/video',StaticFiles(directory='video'),name='video')
 
+#비디오 파일 & DB에 저장 
 @app.post("/upload_video/")
 async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_db)):
     video_name = video.filename
@@ -46,3 +47,17 @@ async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while uploading the video. Error: {e}")
+    
+    
+
+
+stored_objects = []
+
+@app.post("/upload_detect_objects/")
+async def upload_detect_objects(object: str = Form(...)):
+    if object is None:
+        raise HTTPException(status_code=400, detail="No object provided")
+
+    # 객체를 서버의 리스트에 저장
+    stored_objects.append(object)
+    return {"message": "Object upload successful", "current_objects": stored_objects}
