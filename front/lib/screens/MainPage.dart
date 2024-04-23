@@ -35,6 +35,12 @@ class _MainPageState extends State<MainPage> {
         textEditingController.clear();  // 텍스트 필드 초기화
       });
       debugPrint('List updated: $detectObjects');
+
+      ApiService.uploadDetectObjects(detectObjects.first).then((_) {
+        debugPrint('Upload successful');
+      }).catchError((error) {
+        debugPrint('Error uploading object: $error');
+      });
     }
   }
 
