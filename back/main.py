@@ -5,6 +5,11 @@ from sqlalchemy.orm import Session
 from typing import List
 import shutil
 
+import os
+from pydantic import BaseModel
+from dotenv import load_dotenv
+import replicate
+
 from crud import *
 from database import *
 
@@ -19,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],     # 허용할 method(default=['GET']
     allow_headers=["*"],     # 허용할 HTTP Header 목록
 )
+
+
 
 #정적 파일 디렉토리 설정
 app.mount('/video',StaticFiles(directory='video'),name='video')
@@ -50,7 +57,6 @@ async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_
     
     
 
-
 stored_objects = []
 
 @app.post("/upload_detect_objects/")
@@ -61,3 +67,38 @@ async def upload_detect_objects(object: str = Form(...)):
     # 객체를 서버의 리스트에 저장
     stored_objects.append(object)
     return {"message": "Object upload successful", "current_objects": stored_objects}
+
+
+
+
+# 환경 변수 파일 로드
+load_dotenv()
+
+# API 토큰 환경변수에서 가져오기
+api_token = os.getenv("REPLICATE_API_TOKEN")
+
+class ImageQuery(BaseModel):
+    image_url: str
+    query: str
+    box_threshold: float = 0.2
+    text_threshold: float = 0.2
+    show_visualisation: bool = True
+
+@app.post("/detecting_video/")
+async def process_image(query: ImageQuery):
+    try:
+        output = replicate.run(
+            "adirik/grounding-dino:efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa",
+            input={
+                "image": query.image_url,
+                "query": query.query,
+                "box_threshold": query.box_threshold,
+                "text_threshold": query.text_threshold,
+                "show_visualisation": query.show_visualisation
+            }
+        )
+        return output
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
