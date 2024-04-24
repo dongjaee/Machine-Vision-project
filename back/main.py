@@ -102,3 +102,9 @@ async def process_image(query: ImageQuery):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+## 아웃풋 예시
+# {'detections': [{'bbox': [19, 204, 408, 563], 'confidence': 0.8077122569084167, 'label': 'pink mug'},
+#                 {'bbox': [545, 263, 952, 650], 'confidence': 0.7644544839859009, 'label': 'pink mug'}, 
+#                 {'bbox': [416, 60, 764, 380], 'confidence': 0.4754282832145691, 'label': 'pink mug'}, 
+#                 {'bbox': [909, 161, 1078, 487], 'confidence': 0.43150201439857483, 'label': 'pink mug'}],
+#                 'result_image': 'https://replicate.delivery/pbxt/u0xqdnJ0Dx7WNByxUzyg18GL0M7y6AWeclwMPwZ5Ndp0AoWJA/result.png'}
