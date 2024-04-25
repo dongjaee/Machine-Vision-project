@@ -1,9 +1,11 @@
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from typing import List
 import shutil
+import uuid
 
 import os
 from pydantic import BaseModel
@@ -25,42 +27,41 @@ app.add_middleware(
     allow_headers=["*"],     # 허용할 HTTP Header 목록
 )
 
+load_dotenv()
 
-
-#정적 파일 디렉토리 설정
-app.mount('/video',StaticFiles(directory='video'),name='video')
-
-#비디오 파일 & DB에 저장 
 @app.post("/upload_video/")
 async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_db)):
     video_name = video.filename
     video_path = f"video/{video_name}"
-    video_url = f"http://localhost:8000/video/{video_name}"  
+    video_url = f"https://osovideo.blob.core.windows.net/oso-video/{video_name}"  
+
+    container_name = "oso-video"
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    connection_string = f'DefaultEndpointsProtocol=https;AccountName=osovideo;AccountKey={AZURE_ACCOUNT_KEY};EndpointSuffix=core.windows.net'
+    
+    blob_client = BlobClient.from_connection_string(conn_str=connection_string, container_name=container_name, blob_name=video.filename)
 
     try:
-        # 비디오 파일을 디렉토리에 저장
-        with open(video_path, "wb+") as file_object:
-            file_object.write(await video.read())
+        # 비동기로 파일 데이터 읽기
+        file_data = await video.read()
 
-        # 비디오 데이터베이스 항목 생성
+        # 동기로 Azure Blob Storage에 업로드
+        blob_client.upload_blob(file_data, overwrite=True)
+
+        # DB에 추가
         video_entry = Video(videoName=video_name, videoURL=video_url)
-        db.add(video_entry)
-        db.commit()
-        db.refresh(video_entry)
-        return {
-            "videoName": video_entry.videoName,
-            "videoURL": video_entry.videoURL,
-            "message": "Video uploaded successfully and info saved to database."
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred while uploading the video. Error: {e}")
-    
-    
+#         db.add(video_entry)
+#         db.commit()
+#         db.refresh(video_entry)
 
-stored_objects = []
+        return {"filename": video.filename, "message": "Video uploaded successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while uploading the video. Error: {str(e)}")
+
 
 @app.post("/upload_detect_objects/")
 async def upload_detect_objects(object: str = Form(...)):
+    stored_objects = []
     if object is None:
         raise HTTPException(status_code=400, detail="No object provided")
 
@@ -69,28 +70,22 @@ async def upload_detect_objects(object: str = Form(...)):
     return {"message": "Object upload successful", "current_objects": stored_objects}
 
 
-
-
-# 환경 변수 파일 로드
-load_dotenv()
-
-# API 토큰 환경변수에서 가져오기
-api_token = os.getenv("REPLICATE_API_TOKEN")
-
-class ImageQuery(BaseModel):
-    image_url: str
+class VideoQuery(BaseModel):
+    video_url: str
     query: str
     box_threshold: float = 0.2
     text_threshold: float = 0.2
     show_visualisation: bool = True
 
 @app.post("/detecting_video/")
-async def process_image(query: ImageQuery):
+async def detecting_video(query: VideoQuery):
+    api_token = os.getenv("REPLICATE_API_TOKEN")
+    
     try:
         output = replicate.run(
             "adirik/grounding-dino:efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa",
             input={
-                "image": query.image_url,
+                "image": query.video_url,
                 "query": query.query,
                 "box_threshold": query.box_threshold,
                 "text_threshold": query.text_threshold,
