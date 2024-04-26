@@ -40,26 +40,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  // Future<void> pickVideo() async {
-  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
-  //     type: FileType.any,
-  //     withData: true, // 파일의 바이트 데이터를 함께 가져오도록 설정합니다.
-  //   );
-  //
-  //   if (result != null) {
-  //     // 바이트 데이터로부터 Blob 객체를 생성합니다.
-  //     final blob = html.Blob([result.files.single.bytes!]);
-  //     // Blob으로부터 임시 URL을 생성합니다.
-  //     final url = html.Url.createObjectUrl(blob);
-  //
-  //     setState(() {
-  //       videoUrl = url; // 임시 URL을 videoUrl에 저장
-  //     });
-  //
-  //     // 선택된 파일의 이름과 생성된 임시 URL을 출력하여 확인합니다.
-  //     print('선택된 파일: ${result.files.single.name}, 임시 URL: $videoUrl');
-  //   }
-  // }
   Future<void> pickVideo() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.video,
@@ -247,6 +227,20 @@ class _MainPageState extends State<MainPage> {
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(height: 40),
+                      Center(
+                        child:ElevatedButton(
+                          onPressed: () {
+                            // '실행' 버튼 클릭 시 실행할 작업
+                          },
+                          child: Text('실행',style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
