@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -6,10 +7,13 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class ApiService {
-  static const String addressIP = 'localhost';
+  static const String addressIP = 'localhost:8000';
+  //static List<String> uploadedVideoUrls = [];
+  static String? uploadedVideoUrl;
+  static Function? onVideoUrlChanged;
 
   Future<void> uploadVideo(Uint8List fileBytes, String fileName) async {
-    var uri = Uri.parse('http://$addressIP:8000/upload_video/');
+    var uri = Uri.parse('http://$addressIP/upload_video/');
     var request = http.MultipartRequest('POST', uri)
       ..files.add(http.MultipartFile.fromBytes(
         'video', // 서버에서 기대하는 필드 이름
@@ -19,16 +23,23 @@ class ApiService {
 
     // 요청 전송
     var response = await request.send();
+    var responseData = await http.Response.fromStream(response);
 
     if (response.statusCode == 200) {
       print('Upload successful');
+      var data = jsonDecode(responseData.body);
+      //uploadedVideoUrls.add(data['videourl']);
+      uploadedVideoUrl = data['videourl'];
+      print(uploadedVideoUrl);
+      onVideoUrlChanged?.call();
+      //return data['videourl'];
     } else {
       print('Upload failed');
     }
   }
 
   static Future<void> uploadDetectObjects(String object) async {
-    var uri = Uri.parse('http://$addressIP:8000/upload_detect_objects/');
+    var uri = Uri.parse('http://$addressIP/upload_detect_objects/');
 
     var response = await http.post(
         uri,
