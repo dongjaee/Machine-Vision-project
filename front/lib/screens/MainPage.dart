@@ -23,6 +23,7 @@ class _MainPageState extends State<MainPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? videoUrl; // 동영상 URL
   Uint8List? videoBytes; // 동영상 Bytes
+  VideoPlayerController? _controller;
 
   final List<String> detectObjects = []; // 탐지할 객체 저장
   final TextEditingController textEditingController = TextEditingController();
@@ -113,7 +114,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                       ListTile(
                         leading: Icon(Icons.date_range),
-                        title: Text('yesterday'),
+                        title: Text('History'),
                       ),
                       // 추가적인 메뉴 아이템들...
                     ],
@@ -147,14 +148,7 @@ class _MainPageState extends State<MainPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          //child: videoUrl != null
-                              //? PlayingVideo(videoUrl: videoUrl!) // 선택된 동영상 재생
-                              //: Center(
-                              //    child: Text(
-                              //      "동영상 재생", // default message
-                              //      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                              //    ),
-                              //  ),
+                          child: PlayingVideo(),
                         ),
                       ),
                       SizedBox(height:50),
