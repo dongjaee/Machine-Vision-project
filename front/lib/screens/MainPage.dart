@@ -24,6 +24,7 @@ class _MainPageState extends State<MainPage> {
   String? videoUrl; // 동영상 URL
   Uint8List? videoBytes; // 동영상 Bytes
   VideoPlayerController? _controller;
+  bool useOutputUrl = false;
 
   final List<String> detectObjects = []; // 탐지할 객체 저장
   final TextEditingController textEditingController = TextEditingController();
@@ -148,7 +149,7 @@ class _MainPageState extends State<MainPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: PlayingVideo(),
+                          child: PlayingVideo(useOutputUrl: useOutputUrl),
                         ),
                       ),
                       SizedBox(height:50),
@@ -226,7 +227,9 @@ class _MainPageState extends State<MainPage> {
                       Center(
                         child:ElevatedButton(
                           onPressed: () {
-                            // '실행' 버튼 클릭 시 실행할 작업
+                            if (ApiService.uploadedVideoUrl != null) {
+                              ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
+                            }
                           },
                           child: Text('실행',style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
