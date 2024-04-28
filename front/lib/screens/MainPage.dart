@@ -81,23 +81,47 @@ class _MainPageState extends State<MainPage> {
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Text(
-                '메뉴 헤더',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Chat-Monitoring_v1 Guide',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '다양한 원하는 모든 것을 탐지하세요!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
+            SizedBox(height: 50),
             ListTile(
-              leading: Icon(Icons.message),
-              title: Text('1'),
+              leading: Icon(Icons.check),
+              title: Text('로컬에서 동영상을 선택해주세요'),
             ),
+            SizedBox(height:20),
             ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('2'),
+              leading: Icon(Icons.check),
+              title: Text('객체명은 영어로 입력해주세요'),
             ),
-            // 다른 메뉴 아이템들을 계속 추가할 수 있습니다.
+            SizedBox(height:20),
+            ListTile(
+              leading: Icon(Icons.check),
+              title: Text('실행 버튼을 눌러주세요'),
+            ),
+            SizedBox(height:150),
+            ListTile(
+              leading: Icon(Icons.description),
+              title: Text('탐지 언어: 영어'),
+            ),
           ],
         ),
       ),
