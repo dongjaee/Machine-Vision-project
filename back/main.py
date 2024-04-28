@@ -1,8 +1,9 @@
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
 from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from datetime import datetime
 from typing import List
 import shutil
 import uuid
@@ -33,30 +34,35 @@ load_dotenv()
 async def upload_video(video: UploadFile = File(...), db: Session = Depends(get_db)):
     video_name = video.filename
     video_path = f"video/{video_name}"
-    video_url = f"https://osovideo.blob.core.windows.net/oso-video/{video_name}"  
-
+    video_url = f"https://osovideo.blob.core.windows.net/oso-video/{video_name}"
     container_name = "oso-video"
     AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
     connection_string = f'DefaultEndpointsProtocol=https;AccountName=osovideo;AccountKey={AZURE_ACCOUNT_KEY};EndpointSuffix=core.windows.net'
-    
     blob_client = BlobClient.from_connection_string(conn_str=connection_string, container_name=container_name, blob_name=video.filename)
 
     try:
         # 비동기로 파일 데이터 읽기
         file_data = await video.read()
-
+        
+        # ContentSettings 객체 생성 및 콘텐츠 형식 설정
+        content_settings = ContentSettings(
+            content_type="video/mp4",
+            content_disposition=None
+        )
+        
         # 동기로 Azure Blob Storage에 업로드
-        blob_client.upload_blob(file_data, overwrite=True)
-
+        blob_client.upload_blob(file_data, overwrite=True, content_settings=content_settings)
+        
         # DB에 추가
         video_entry = Video(videoName=video_name, videoURL=video_url)
-#         db.add(video_entry)
-#         db.commit()
-#         db.refresh(video_entry)
-
-        return {"filename": video.filename, "message": "Video uploaded successfully."}
+        db.add(video_entry)
+        db.commit()
+        db.refresh(video_entry)
+        
+        return {"filename": video.filename, "videourl": video_url, "message": "Video uploaded successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while uploading the video. Error: {str(e)}")
+    
 
 
 @app.post("/upload_detect_objects/")
@@ -97,9 +103,4 @@ async def detecting_video(query: VideoQuery):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-## 아웃풋 예시
-# {'detections': [{'bbox': [19, 204, 408, 563], 'confidence': 0.8077122569084167, 'label': 'pink mug'},
-#                 {'bbox': [545, 263, 952, 650], 'confidence': 0.7644544839859009, 'label': 'pink mug'}, 
-#                 {'bbox': [416, 60, 764, 380], 'confidence': 0.4754282832145691, 'label': 'pink mug'}, 
-#                 {'bbox': [909, 161, 1078, 487], 'confidence': 0.43150201439857483, 'label': 'pink mug'}],
-#                 'result_image': 'https://replicate.delivery/pbxt/u0xqdnJ0Dx7WNByxUzyg18GL0M7y6AWeclwMPwZ5Ndp0AoWJA/result.png'}
+
