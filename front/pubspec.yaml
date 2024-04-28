@@ -33,6 +33,7 @@ dependencies:
   video_player: ^2.2.14
   file_picker: ^6.1.1
   http: ^1.2.0
+  intl: ^0.17.0
 
 
   # The following adds the Cupertino Icons font to your application.
