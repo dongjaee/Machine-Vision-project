@@ -9,13 +9,16 @@ import 'dart:io';
 
 class ApiService {
   static const String addressIP = 'localhost:8000';
-  //static List<String> uploadedVideoUrls = [];
+
   static String? uploadedVideoUrl;
   static String? outputVideoUrl;
-  //static Function? onVideoUrlChanged;
+  static String? uploadedVideoName;
+
 
   static VoidCallback? onVideoUrlChanged;
   static VoidCallback? onOutputVideoUrlChanged;
+  static VoidCallback? onVideoNameChanged;
+
 
   static void updateVideoUrl(String url) {
     uploadedVideoUrl = url;
@@ -23,6 +26,11 @@ class ApiService {
 
     outputVideoUrl = url.replaceFirst('.mp4', '_converted.mp4');
     onOutputVideoUrlChanged?.call();
+  }
+
+  static void updateVideoName(String name) {
+    uploadedVideoName = name;
+    onVideoNameChanged?.call();
   }
 
   Future<void> uploadVideo(Uint8List fileBytes, String fileName) async {
@@ -41,7 +49,7 @@ class ApiService {
     if (response.statusCode == 200) {
       print('Upload successful');
       var data = jsonDecode(responseData.body);
-      //uploadedVideoUrls.add(data['videourl']);
+
       uploadedVideoUrl = data['videourl'];
       print(uploadedVideoUrl);
       onVideoUrlChanged?.call();

@@ -6,6 +6,7 @@ import 'package:front/designs/SettingButtons.dart';
 import 'package:front/designs/SettingColor.dart';
 import 'package:front/functions/PlayingVideo.dart';
 import 'package:front/functions/ApiService.dart';
+import 'package:intl/intl.dart';
 
 import 'dart:typed_data';
 import 'dart:html';
@@ -25,6 +26,7 @@ class _MainPageState extends State<MainPage> {
   Uint8List? videoBytes; // 동영상 Bytes
   VideoPlayerController? _controller;
   bool useOutputUrl = false;
+  List<Map<String, String>> uploadedVideos = [];
 
   final List<String> detectObjects = []; // 탐지할 객체 저장
   final TextEditingController textEditingController = TextEditingController();
@@ -61,6 +63,7 @@ class _MainPageState extends State<MainPage> {
     _scaffoldKey.currentState?.openEndDrawer();
   }
 
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -88,11 +91,11 @@ class _MainPageState extends State<MainPage> {
             ),
             ListTile(
               leading: Icon(Icons.message),
-              title: Text('안녕'),
+              title: Text('1'),
             ),
             ListTile(
               leading: Icon(Icons.account_circle),
-              title: Text('메롱'),
+              title: Text('2'),
             ),
             // 다른 메뉴 아이템들을 계속 추가할 수 있습니다.
           ],
@@ -107,14 +110,26 @@ class _MainPageState extends State<MainPage> {
                 flex: 1,
                 child: Container(
                   color: colorLeftBg,
-                  child: ListView(
+                  child: Column(
                     children: <Widget>[
                       ListTile(
                         leading: Icon(Icons.date_range),
                         title: Text('Today'),
                       ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: uploadedVideos.length,
+                          itemBuilder: (context, index) {
+                            final video = uploadedVideos[index];
+                            return ListTile(
+                              title: Text(video['name']!),
+                              subtitle: Text(video['time']!),
+                            );
+                          },
+                        ),
+                      ),
                       ListTile(
-                        leading: Icon(Icons.date_range),
+                        leading: Icon(Icons.history),
                         title: Text('History'),
                       ),
                       // 추가적인 메뉴 아이템들...
@@ -229,6 +244,17 @@ class _MainPageState extends State<MainPage> {
                           onPressed: () {
                             if (ApiService.uploadedVideoUrl != null) {
                               ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
+
+                              // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
+                              String videoUrl = ApiService.outputVideoUrl!.split('/').last;
+                              String uploadTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+                              setState(() {
+                                uploadedVideos.add({
+                                  'name': videoUrl,
+                                  'time': uploadTime,
+                                });
+                              });
                             }
                           },
                           child: Text('실행',style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
