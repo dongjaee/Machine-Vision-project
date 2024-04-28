@@ -53,10 +53,15 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
 
 import 'package:front/functions/ApiService.dart';
 
 class PlayingVideo extends StatefulWidget {
+  final bool useOutputUrl;
+
+  PlayingVideo({this.useOutputUrl = false});
+
   @override
   _PlayingVideoState createState() => _PlayingVideoState();
 }
@@ -65,26 +70,72 @@ class _PlayingVideoState extends State<PlayingVideo> {
   VideoPlayerController? _controller;
   bool _isLoading = true;
 
+
+
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   ApiService.onVideoUrlChanged = () {
+  //     setState(() {
+  //       initializeVideo(); // uploadedVideoUrl 변경 시 초기화 함수 호출
+  //     });
+  //   };
+  // }
   @override
   void initState() {
     super.initState();
     ApiService.onVideoUrlChanged = () {
       setState(() {
-        initializeVideo(); // uploadedVideoUrl 변경 시 초기화 함수 호출
+        initializeVideo(useUploadedUrl: true);
       });
     };
+    ApiService.onOutputVideoUrlChanged = () {
+      setState(() {
+        initializeVideo(useUploadedUrl: false);
+      });
+    };
+    initializeVideo(useUploadedUrl: true);
   }
 
-  Future<void> initializeVideo() async {
+  // Future<void> initializeVideo() async {
+  //   try {
+  //     if (ApiService.uploadedVideoUrl != null) {
+  //       _controller?.dispose(); // 기존 컨트롤러 해제
+  //       _controller = VideoPlayerController.network(ApiService.uploadedVideoUrl!);
+  //       await _controller!.initialize();
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //       _controller!.play(); // 동영상 자동 재생
+  //     } else {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error initializing video: $e');
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
+  Future<void> initializeVideo({required bool useUploadedUrl}) async {
     try {
-      if (ApiService.uploadedVideoUrl != null) {
-        _controller?.dispose(); // 기존 컨트롤러 해제
+      if (!useUploadedUrl && ApiService.outputVideoUrl != null) {
+        _controller?.dispose();
+        _controller = VideoPlayerController.network(ApiService.outputVideoUrl!);
+      } else if (useUploadedUrl && ApiService.uploadedVideoUrl != null) {
+        _controller?.dispose();
         _controller = VideoPlayerController.network(ApiService.uploadedVideoUrl!);
+      }
+
+      if (_controller != null) {
         await _controller!.initialize();
         setState(() {
           _isLoading = false;
         });
-        _controller!.play(); // 동영상 자동 재생
+        _controller!.play();
       } else {
         setState(() {
           _isLoading = false;
@@ -97,6 +148,7 @@ class _PlayingVideoState extends State<PlayingVideo> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
