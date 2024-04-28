@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -10,7 +11,19 @@ class ApiService {
   static const String addressIP = 'localhost:8000';
   //static List<String> uploadedVideoUrls = [];
   static String? uploadedVideoUrl;
-  static Function? onVideoUrlChanged;
+  static String? outputVideoUrl;
+  //static Function? onVideoUrlChanged;
+
+  static VoidCallback? onVideoUrlChanged;
+  static VoidCallback? onOutputVideoUrlChanged;
+
+  static void updateVideoUrl(String url) {
+    uploadedVideoUrl = url;
+    onVideoUrlChanged?.call();
+
+    outputVideoUrl = url.replaceFirst('.mp4', '_converted.mp4');
+    onOutputVideoUrlChanged?.call();
+  }
 
   Future<void> uploadVideo(Uint8List fileBytes, String fileName) async {
     var uri = Uri.parse('http://$addressIP/upload_video/');
