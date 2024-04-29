@@ -44,6 +44,15 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
+  String _getVideoText() {
+    if (ApiService.outputVideoUrl != null && ApiService.videoTextMap.containsKey(ApiService.outputVideoUrl)) {
+      return ApiService.videoTextMap[ApiService.outputVideoUrl]!;
+    } else if (ApiService.uploadedVideoUrl != null) {
+      return ''; // 동영상 업로드 시 빈 문자열 반환
+    }
+    return '';
+  }
+
   Future<void> pickVideo() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.video,
@@ -182,8 +191,8 @@ class _MainPageState extends State<MainPage> {
                       SizedBox(height:50),
                       Center(
                         child: Container(
-                          height: screenHeight * 0.55, // 높이 지정
-                          width: screenWidth * 0.55, // 너비 지정
+                          height: screenHeight * 0.55, // 높이
+                          width: screenWidth * 0.55, // 너비
                           decoration: BoxDecoration(
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
@@ -191,7 +200,20 @@ class _MainPageState extends State<MainPage> {
                           child: PlayingVideo(useOutputUrl: useOutputUrl),
                         ),
                       ),
-                      SizedBox(height:50),
+                      SizedBox(height:20),
+                      Center(  // Center 위젯으로 감싸기
+                        child: Container(
+                          width: screenWidth * 0.55,
+                          color: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            _getVideoText(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height:20),
                       Row(
                         children: <Widget>[
                           Flexible(
@@ -262,7 +284,7 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 20),
                       Center(
                         child:ElevatedButton(
                           onPressed: () {
