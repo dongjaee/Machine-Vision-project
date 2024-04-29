@@ -13,6 +13,13 @@ class ApiService {
   static String? uploadedVideoUrl;
   static String? outputVideoUrl;
   static String? uploadedVideoName;
+  static Map<String, String> videoTextMap = {
+    'https://osovideo.blob.core.windows.net/oso-video/conveyorprocess_output.mp4': '바운딩 박스 개수 white object: 89, yellow object: 105',
+    'https://osovideo.blob.core.windows.net/oso-video/forest_output.mp4': '바운딩 박스 개수 wild boar: 14',
+    'https://osovideo.blob.core.windows.net/oso-video/mot_output.mp4': '바운딩 박스 개수 people: 68',
+
+    // 필요한 URL과 텍스트를 추가로 매핑해줍니다.
+  };
 
 
   static VoidCallback? onVideoUrlChanged;
@@ -24,7 +31,7 @@ class ApiService {
     uploadedVideoUrl = url;
     onVideoUrlChanged?.call();
 
-    outputVideoUrl = url.replaceFirst('.mp4', '_converted.mp4');
+    outputVideoUrl = url.replaceFirst('.mp4', '_output.mp4');
     onOutputVideoUrlChanged?.call();
   }
 
