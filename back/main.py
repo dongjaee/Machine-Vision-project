@@ -1,13 +1,18 @@
+import io
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
 from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from matplotlib import pyplot as plt
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from datetime import datetime
 from typing import List
 import shutil
 import uuid
+import base64
 
+import requests
 import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -76,31 +81,63 @@ async def upload_detect_objects(object: str = Form(...)):
     return {"message": "Object upload successful", "current_objects": stored_objects}
 
 
-class VideoQuery(BaseModel):
-    video_url: str
-    query: str
-    box_threshold: float = 0.2
-    text_threshold: float = 0.2
-    show_visualisation: bool = True
 
-@app.post("/detecting_video/")
-async def detecting_video(query: VideoQuery):
-    api_token = os.getenv("REPLICATE_API_TOKEN")
+@app.post("/process_video")
+async def process_video(object_name: str, db: Session = Depends(get_db)):
+    # DB에서 가장 마지막에 업로드된 동영상 URL 조회
+    last_video = db.query(Video).order_by(desc(Video.videoName)).first()
+    if last_video is None:
+        raise HTTPException(status_code=404, detail="No videos found in the database")
+
+    video_url = last_video.videoURL
+    video_name = os.path.basename(video_url)
+    video_name_without_ext = os.path.splitext(video_name)[0]
+
+    # 코랩의 FastAPI 앱 호출
+    colab_url = "https://21dc-35-194-182-53.ngrok-free.app/detect_objects"  # 최신 ngrok URL로 업데이트 필요
+    response = requests.post(colab_url, json={"video_url": video_url, "object_name": object_name})
+
+    if response.status_code == 200:
+        result = response.json()
+        total_bounding_boxes = result["total_bounding_boxes"]
+        graph_data = result["graph_data"]
+        video_data = result["video_data"]
+
+        # Base64 디코딩
+        graph_data = base64.b64decode(graph_data)
+        video_data = base64.b64decode(video_data)
+
+        # 로컬 저장 경로 설정
+        output_dir = os.path.join('.', 'output_asset')
+        os.makedirs(output_dir, exist_ok=True)
+        graph_path = os.path.join(output_dir, f"{video_name_without_ext}_result.png")
+        video_path = os.path.join(output_dir, f"{video_name_without_ext}_output_video.mp4")
+
+        # 그래프 이미지 저장
+        with open(graph_path, "wb") as f:
+            f.write(graph_data)
+
+        # 비디오 파일 저장
+        with open(video_path, "wb") as f:
+            f.write(video_data)
+
+        return {
+            "total_bounding_boxes": total_bounding_boxes,
+            "graph_data": graph_path,  # 로컬에 저장된 그래프 이미지 경로
+            "output_video_url": video_path  # 로컬에 저장된 아웃풋 비디오 경로
+        }
+    else:
+        raise HTTPException(status_code=500, detail="Failed to process video")
     
-    try:
-        output = replicate.run(
-            "adirik/grounding-dino:efd10a8ddc57ea28773327e881ce95e20cc1d734c589f7dd01d2036921ed78aa",
-            input={
-                "image": query.video_url,
-                "query": query.query,
-                "box_threshold": query.box_threshold,
-                "text_threshold": query.text_threshold,
-                "show_visualisation": query.show_visualisation
-            }
-        )
-        return output
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# 로컬 서버 실행
+import uvicorn
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    
+
+
+
+
 
 
 
