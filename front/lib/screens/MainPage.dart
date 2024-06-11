@@ -286,29 +286,46 @@ class _MainPageState extends State<MainPage> {
                       ),
                       SizedBox(height: 20),
                       Center(
-                        child:ElevatedButton(
-                          onPressed: () {
-                            if (ApiService.uploadedVideoUrl != null) {
-                              ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            ElevatedButton(
+                              onPressed: () {
+                                if (ApiService.uploadedVideoUrl != null) {
+                                  ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
 
-                              // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
-                              String videoUrl = ApiService.outputVideoUrl!.split('/').last;
-                              String uploadTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+                                  // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
+                                  String videoUrl = ApiService.outputVideoUrl!.split('/').last;
+                                  String uploadTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
 
-                              setState(() {
-                                uploadedVideos.add({
-                                  'name': videoUrl,
-                                  'time': uploadTime,
-                                });
-                              });
-                            }
-                          },
-                          child: Text('실행',style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                                  setState(() {
+                                    uploadedVideos.add({
+                                      'name': videoUrl,
+                                      'time': uploadTime,
+                                    });
+                                  });
+                                }
+                              },
+                              child: Text('실행', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(width: 20), // 두 버튼 사이의 간격을 조절
+                            ElevatedButton(
+                              onPressed: () {
+                                // 결과 버튼 클릭 시 수행할 작업을 여기에 작성
+                              },
+                              child: Text('결과', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
