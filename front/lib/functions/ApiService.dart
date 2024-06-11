@@ -17,6 +17,7 @@ class ApiService {
     'https://osovideo.blob.core.windows.net/oso-video/conveyorprocess_output.mp4': '바운딩 박스 개수 white object: 89, yellow object: 105',
     'https://osovideo.blob.core.windows.net/oso-video/forest_output.mp4': '바운딩 박스 개수 wild boar: 14',
     'https://osovideo.blob.core.windows.net/oso-video/mot_output.mp4': '바운딩 박스 개수 people: 68',
+    'https://osovideo.blob.core.windows.net/oso-video/lego_output.mp4': '바운딩 박스 개수 red ball: 4',
 
     // 필요한 URL과 텍스트를 추가로 매핑해줍니다.
   };
@@ -79,6 +80,28 @@ class ApiService {
       print('Object upload successful');
     } else {
       print('Object upload failed');
+    }
+  }
+
+
+  static Future<Map<String, dynamic>> processVideo(String objectName) async {
+    var uri = Uri.parse('http://$addressIP/process_video');
+
+    var response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'object_name': objectName}),
+      );
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        return {
+          "total_bounding_boxes": data["total_bounding_boxes"],
+        "graph_data": data["graph_data"],
+        "output_video_url": data["output_video_url"],
+      };
+    } else {
+      throw Exception('Failed to process video');
     }
   }
 }
