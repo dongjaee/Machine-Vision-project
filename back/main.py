@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from datetime import datetime
 from typing import List
+import subprocess
 import shutil
 import uuid
 import base64
@@ -135,6 +136,19 @@ async def upload_detect_objects(object: str = Form(...)):
 # output_asset 디렉토리를 정적 파일로 제공
 app.mount("/output_asset", StaticFiles(directory="output_asset"), name="output_asset")
 
+def convert_to_h264(input_path, output_path):
+    try:
+        # ffmpeg 명령어를 사용하여 동영상을 H.264 코덱으로 변환
+        command = [
+            'ffmpeg', '-i', input_path,
+            '-c:v', 'libx264', '-c:a', 'aac', '-strict', 'experimental',
+            output_path
+        ]
+        subprocess.run(command, check=True)
+        print(f"Video converted successfully: {output_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error converting video: {e}")
+
 @app.post("/process_video")
 async def process_video(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
@@ -166,13 +180,16 @@ async def process_video(request: Request, db: Session = Depends(get_db)):
         output_dir = os.path.join('.', 'output_asset')
         os.makedirs(output_dir, exist_ok=True)
         graph_path = os.path.join(output_dir, f"{video_name_without_ext}_result.png")
-        video_path = os.path.join(output_dir, f"{video_name_without_ext}_output_video.mp4")
+        raw_video_path = os.path.join(output_dir, f"{video_name_without_ext}_raw_output_video.mp4")
+        converted_video_path = os.path.join(output_dir, f"{video_name_without_ext}_output_video.mp4")
 
         with open(graph_path, "wb") as f:
             f.write(graph_data)
 
-        with open(video_path, "wb") as f:
+        with open(raw_video_path, "wb") as f:
             f.write(video_data)
+            
+        convert_to_h264(raw_video_path, converted_video_path)
             
         # 웹에서 접근 가능한 URL을 반환
         base_url = "http://localhost:8000/output_asset"
