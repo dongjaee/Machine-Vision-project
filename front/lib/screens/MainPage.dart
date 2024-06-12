@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 import 'package:front/designs/SettingButtons.dart';
@@ -7,11 +5,16 @@ import 'package:front/designs/SettingColor.dart';
 import 'package:front/functions/PlayingVideo.dart';
 import 'package:front/functions/ApiService.dart';
 import 'package:intl/intl.dart';
+import 'MonitoringPage.dart';
+
 
 import 'dart:typed_data';
-import 'dart:html';
+//import 'dart:html';
+import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 
 
 
@@ -39,8 +42,7 @@ class _MainPageState extends State<MainPage> {
         textEditingController.clear();  // 텍스트 필드 초기화
       });
       debugPrint('List updated: $detectObjects');
-      ApiService.uploadDetectObjects(detectObjects.first).then((_) {
-      });
+      ApiService.uploadDetectObjects(detectObjects.first).then((_) {});
     }
   }
 
@@ -65,6 +67,23 @@ class _MainPageState extends State<MainPage> {
 
       await ApiService().uploadVideo(fileBytes, fileName);
       print('선택된 파일: $fileName');
+    }
+  }
+
+  //새롭게 추가된 부분 6.12
+  Future<void> processAndPlayVideo(String objectName) async {
+    try {
+      var result = await ApiService.processVideo(objectName);
+      print('Result from API: $result');
+
+      if (result['output_video_url'] == null) {
+        throw Exception('output_video_url is null');
+      }
+
+      String outputVideoUrl = result['output_video_url'];
+      ApiService.updateOutputVideoUrl(outputVideoUrl); // 서버 URL 업데이트
+    } catch (e) {
+      print('Failed to process video: $e');
     }
   }
 
@@ -189,6 +208,24 @@ class _MainPageState extends State<MainPage> {
                         ),
                       ),
                       SizedBox(height:50),
+
+                      // //6.12 추가
+                      // Center(
+                      //   child: Container(
+                      //     height: screenHeight * 0.55, // 높이
+                      //     width: screenWidth * 0.55, // 너비
+                      //     decoration: BoxDecoration(
+                      //       color: Colors.grey[300],
+                      //       borderRadius: BorderRadius.circular(25.0),
+                      //     ),
+                      //     child: _controller != null && _controller!.value.isInitialized
+                      //         ? AspectRatio(
+                      //       aspectRatio: _controller!.value.aspectRatio,
+                      //       child: VideoPlayer(_controller!),
+                      //     )
+                      //         : Center(child: Text('동영상을 선택하고 객체를 입력하세요')),
+                      //   ),
+                      // ),
                       Center(
                         child: Container(
                           height: screenHeight * 0.55, // 높이
@@ -197,9 +234,12 @@ class _MainPageState extends State<MainPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: PlayingVideo(useOutputUrl: useOutputUrl),
+                          child: PlayingVideo(),
                         ),
                       ),
+                      //     child: PlayingVideo(useOutputUrl: useOutputUrl),
+                      //   ),
+                      // ),
                       SizedBox(height:20),
                       Center(  // Center 위젯으로 감싸기
                         child: Container(
@@ -292,7 +332,8 @@ class _MainPageState extends State<MainPage> {
                             ElevatedButton(
                               onPressed: () {
                                 if (ApiService.uploadedVideoUrl != null) {
-                                  ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
+                                  //ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
+                                  processAndPlayVideo(detectObjects.isNotEmpty ? detectObjects.first : "");
 
                                   // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
                                   String videoUrl = ApiService.outputVideoUrl!.split('/').last;
@@ -313,10 +354,13 @@ class _MainPageState extends State<MainPage> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 20), // 두 버튼 사이의 간격을 조절
+                            SizedBox(width: 20),
                             ElevatedButton(
                               onPressed: () {
-                                // 결과 버튼 클릭 시 수행할 작업을 여기에 작성
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => MonitoringPage()),
+                                );
                               },
                               child: Text('결과', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
