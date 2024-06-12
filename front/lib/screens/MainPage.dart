@@ -82,6 +82,17 @@ class _MainPageState extends State<MainPage> {
 
       String outputVideoUrl = result['output_video_url'];
       ApiService.updateOutputVideoUrl(outputVideoUrl); // 서버 URL 업데이트
+
+      // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
+      String videoName = outputVideoUrl.split('/').last.split('_output_video.mp4').first; // 수정된 부분
+      String uploadTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+      setState(() {
+        uploadedVideos.add({
+          'name': videoName,
+          'time': uploadTime,
+        });
+      });
     } catch (e) {
       print('Failed to process video: $e');
     }
@@ -209,23 +220,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                       SizedBox(height:50),
 
-                      // //6.12 추가
-                      // Center(
-                      //   child: Container(
-                      //     height: screenHeight * 0.55, // 높이
-                      //     width: screenWidth * 0.55, // 너비
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.grey[300],
-                      //       borderRadius: BorderRadius.circular(25.0),
-                      //     ),
-                      //     child: _controller != null && _controller!.value.isInitialized
-                      //         ? AspectRatio(
-                      //       aspectRatio: _controller!.value.aspectRatio,
-                      //       child: VideoPlayer(_controller!),
-                      //     )
-                      //         : Center(child: Text('동영상을 선택하고 객체를 입력하세요')),
-                      //   ),
-                      // ),
+
                       Center(
                         child: Container(
                           height: screenHeight * 0.55, // 높이
@@ -237,9 +232,6 @@ class _MainPageState extends State<MainPage> {
                           child: PlayingVideo(),
                         ),
                       ),
-                      //     child: PlayingVideo(useOutputUrl: useOutputUrl),
-                      //   ),
-                      // ),
                       SizedBox(height:20),
                       Center(  // Center 위젯으로 감싸기
                         child: Container(
@@ -332,19 +324,7 @@ class _MainPageState extends State<MainPage> {
                             ElevatedButton(
                               onPressed: () {
                                 if (ApiService.uploadedVideoUrl != null) {
-                                  //ApiService.updateVideoUrl(ApiService.uploadedVideoUrl!);
                                   processAndPlayVideo(detectObjects.isNotEmpty ? detectObjects.first : "");
-
-                                  // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
-                                  String videoUrl = ApiService.outputVideoUrl!.split('/').last;
-                                  String uploadTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-
-                                  setState(() {
-                                    uploadedVideos.add({
-                                      'name': videoUrl,
-                                      'time': uploadTime,
-                                    });
-                                  });
                                 }
                               },
                               child: Text('실행', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
