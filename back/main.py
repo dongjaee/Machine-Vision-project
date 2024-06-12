@@ -1,6 +1,6 @@
 import io
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, ContentSettings
-from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException
+from fastapi import FastAPI, File, Form, Request, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from matplotlib import pyplot as plt
@@ -82,9 +82,67 @@ async def upload_detect_objects(object: str = Form(...)):
 
 
 
+# @app.post("/process_video")
+# async def process_video(object_name: str, db: Session = Depends(get_db)):
+#     # DB에서 가장 마지막에 업로드된 동영상 URL 조회
+#     if not requests.request.object_name:
+#         raise HTTPException(status_code=422, detail="Object name is required")
+    
+#     last_video = db.query(Video).order_by(desc(Video.videoName)).first()
+#     if last_video is None:
+#         raise HTTPException(status_code=404, detail="No videos found in the database")
+
+#     video_url = last_video.videoURL
+#     video_name = os.path.basename(video_url)
+#     video_name_without_ext = os.path.splitext(video_name)[0]
+
+#     # 코랩의 FastAPI 앱 호출
+#     colab_url = "https://64e2-35-223-246-27.ngrok-free.app/detect_objects"  # 최신 ngrok URL로 업데이트 필요
+#     response = requests.post(colab_url, json={"video_url": video_url, "object_name": object_name})
+
+#     if response.status_code == 200:
+#         result = response.json()
+#         total_bounding_boxes = result["total_bounding_boxes"]
+#         graph_data = result["graph_data"]
+#         video_data = result["video_data"]
+
+#         # Base64 디코딩
+#         graph_data = base64.b64decode(graph_data)
+#         video_data = base64.b64decode(video_data)
+
+#         # 로컬 저장 경로 설정
+#         output_dir = os.path.join('.', 'output_asset')
+#         os.makedirs(output_dir, exist_ok=True)
+#         graph_path = os.path.join(output_dir, f"{video_name_without_ext}_result.png")
+#         video_path = os.path.join(output_dir, f"{video_name_without_ext}_output_video.mp4")
+
+#         # 그래프 이미지 저장
+#         with open(graph_path, "wb") as f:
+#             f.write(graph_data)
+
+#         # 비디오 파일 저장
+#         with open(video_path, "wb") as f:
+#             f.write(video_data)
+
+#         return {
+#             "total_bounding_boxes": total_bounding_boxes,
+#             "graph_data": graph_path,  # 로컬에 저장된 그래프 이미지 경로
+#             "output_video_url": video_path  # 로컬에 저장된 아웃풋 비디오 경로
+#         }
+#     else:
+#         raise HTTPException(status_code=500, detail="Failed to process video")
+
+# output_asset 디렉토리를 정적 파일로 제공
+app.mount("/output_asset", StaticFiles(directory="output_asset"), name="output_asset")
+
 @app.post("/process_video")
-async def process_video(object_name: str, db: Session = Depends(get_db)):
-    # DB에서 가장 마지막에 업로드된 동영상 URL 조회
+async def process_video(request: Request, db: Session = Depends(get_db)):
+    body = await request.json()
+    object_name = body.get("object_name")
+
+    if not object_name:
+        raise HTTPException(status_code=422, detail="Object name is required")
+
     last_video = db.query(Video).order_by(desc(Video.videoName)).first()
     if last_video is None:
         raise HTTPException(status_code=404, detail="No videos found in the database")
@@ -93,8 +151,7 @@ async def process_video(object_name: str, db: Session = Depends(get_db)):
     video_name = os.path.basename(video_url)
     video_name_without_ext = os.path.splitext(video_name)[0]
 
-    # 코랩의 FastAPI 앱 호출
-    colab_url = "https://21dc-35-194-182-53.ngrok-free.app/detect_objects"  # 최신 ngrok URL로 업데이트 필요
+    colab_url = "https://e6cb-35-240-206-198.ngrok-free.app/detect_objects"
     response = requests.post(colab_url, json={"video_url": video_url, "object_name": object_name})
 
     if response.status_code == 200:
@@ -103,28 +160,26 @@ async def process_video(object_name: str, db: Session = Depends(get_db)):
         graph_data = result["graph_data"]
         video_data = result["video_data"]
 
-        # Base64 디코딩
         graph_data = base64.b64decode(graph_data)
         video_data = base64.b64decode(video_data)
 
-        # 로컬 저장 경로 설정
         output_dir = os.path.join('.', 'output_asset')
         os.makedirs(output_dir, exist_ok=True)
         graph_path = os.path.join(output_dir, f"{video_name_without_ext}_result.png")
         video_path = os.path.join(output_dir, f"{video_name_without_ext}_output_video.mp4")
 
-        # 그래프 이미지 저장
         with open(graph_path, "wb") as f:
             f.write(graph_data)
 
-        # 비디오 파일 저장
         with open(video_path, "wb") as f:
             f.write(video_data)
-
+            
+        # 웹에서 접근 가능한 URL을 반환
+        base_url = "http://localhost:8000/output_asset"
         return {
             "total_bounding_boxes": total_bounding_boxes,
-            "graph_data": graph_path,  # 로컬에 저장된 그래프 이미지 경로
-            "output_video_url": video_path  # 로컬에 저장된 아웃풋 비디오 경로
+            "graph_data": f"{base_url}/{video_name_without_ext}_result.png",
+            "output_video_url": f"{base_url}/{video_name_without_ext}_output_video.mp4"
         }
     else:
         raise HTTPException(status_code=500, detail="Failed to process video")
