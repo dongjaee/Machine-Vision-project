@@ -83,25 +83,33 @@ class ApiService {
     }
   }
 
-
   static Future<Map<String, dynamic>> processVideo(String objectName) async {
     var uri = Uri.parse('http://$addressIP/process_video');
+    print('Sending request to $uri with object_name: $objectName');
 
     var response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'object_name': objectName}),
-      );
+    );
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return {
-          "total_bounding_boxes": data["total_bounding_boxes"],
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      return {
+        "total_bounding_boxes": data["total_bounding_boxes"],
         "graph_data": data["graph_data"],
         "output_video_url": data["output_video_url"],
       };
     } else {
       throw Exception('Failed to process video');
     }
+  }
+
+  static void updateOutputVideoUrl(String absolutePath) {
+    outputVideoUrl = absolutePath;
+    onOutputVideoUrlChanged?.call();
   }
 }
