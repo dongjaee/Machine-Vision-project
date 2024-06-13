@@ -4,13 +4,10 @@ import 'package:front/designs/SettingButtons.dart';
 import 'package:front/designs/SettingColor.dart';
 import 'package:front/functions/PlayingVideo.dart';
 import 'package:front/functions/ApiService.dart';
-import 'package:intl/intl.dart';
 import 'MonitoringPage.dart';
 
-
-import 'dart:typed_data';
-//import 'dart:html';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 import 'package:file_picker/file_picker.dart';
@@ -30,6 +27,7 @@ class _MainPageState extends State<MainPage> {
   VideoPlayerController? _controller;
   bool useOutputUrl = false;
   List<Map<String, String>> uploadedVideos = [];
+  Map<String, dynamic>? result;
 
   final List<String> detectObjects = []; // 탐지할 객체 저장
   final TextEditingController textEditingController = TextEditingController();
@@ -44,15 +42,6 @@ class _MainPageState extends State<MainPage> {
       debugPrint('List updated: $detectObjects');
       ApiService.uploadDetectObjects(detectObjects.first).then((_) {});
     }
-  }
-
-  String _getVideoText() {
-    if (ApiService.outputVideoUrl != null && ApiService.videoTextMap.containsKey(ApiService.outputVideoUrl)) {
-      return ApiService.videoTextMap[ApiService.outputVideoUrl]!;
-    } else if (ApiService.uploadedVideoUrl != null) {
-      return ''; // 동영상 업로드 시 빈 문자열 반환
-    }
-    return '';
   }
 
   Future<void> pickVideo() async {
@@ -73,14 +62,14 @@ class _MainPageState extends State<MainPage> {
   //새롭게 추가된 부분 6.12
   Future<void> processAndPlayVideo(String objectName) async {
     try {
-      var result = await ApiService.processVideo(objectName);
-      print('Result from API: $result');
+      var resultData = await ApiService.processVideo(objectName);
+      print('Result from API: $resultData');
 
-      if (result['output_video_url'] == null) {
+      if (resultData['output_video_url'] == null) {
         throw Exception('output_video_url is null');
       }
 
-      String outputVideoUrl = result['output_video_url'];
+      String outputVideoUrl = resultData['output_video_url'];
       ApiService.updateOutputVideoUrl(outputVideoUrl); // 서버 URL 업데이트
 
       // 실행 버튼 클릭 시 uploadedVideos 리스트에 동영상 정보 추가
@@ -92,6 +81,7 @@ class _MainPageState extends State<MainPage> {
           'name': videoName,
           'time': uploadTime,
         });
+        result = resultData;
       });
     } catch (e) {
       print('Failed to process video: $e');
@@ -100,6 +90,15 @@ class _MainPageState extends State<MainPage> {
 
   void _openEndDrawer() {
     _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+  void _goToMonitoringPage() {
+    if (result != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MonitoringPage(result : result!)),
+      );
+    }
   }
 
 
@@ -195,7 +194,6 @@ class _MainPageState extends State<MainPage> {
                         leading: Icon(Icons.history),
                         title: Text('History'),
                       ),
-                      // 추가적인 메뉴 아이템들...
                     ],
                   ),
                 ),
@@ -238,11 +236,6 @@ class _MainPageState extends State<MainPage> {
                           width: screenWidth * 0.55,
                           color: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            _getVideoText(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16),
-                          ),
                         ),
                       ),
                       SizedBox(height:20),
@@ -336,12 +329,7 @@ class _MainPageState extends State<MainPage> {
                             ),
                             SizedBox(width: 20),
                             ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => MonitoringPage()),
-                                );
-                              },
+                              onPressed: _goToMonitoringPage,
                               child: Text('결과', style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
