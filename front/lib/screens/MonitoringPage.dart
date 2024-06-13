@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:front/designs/SettingColor.dart';
+import 'package:front/functions/ApiService.dart';
 
 class MonitoringPage extends StatefulWidget {
+  final Map<String, dynamic> result;
+
+  MonitoringPage({required this.result});
   @override
   _MonitoringPageState createState() => _MonitoringPageState();
 }
@@ -9,6 +13,32 @@ class MonitoringPage extends StatefulWidget {
 class _MonitoringPageState extends State<MonitoringPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map<String, String>> uploadedVideos = [];
+  late String graphUrl;
+  late int totalBoundingBoxes;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+    graphUrl = widget.result['graph_data'];
+    totalBoundingBoxes = widget.result['total_bounding_boxes'];
+    print('MonitoringPage initialized with graphUrl: $graphUrl and totalBoundingBoxes: $totalBoundingBoxes');
+  }
+
+  void _updateMonitoringData(Map<String, dynamic> data) {
+    print('Received data in MonitoringPage: $data');
+    setState(() {
+      graphUrl = data['graph_data'];
+      totalBoundingBoxes = data['total_bounding_boxes'];
+    });
+  }
+
+  void _openEndDrawer() {
+    _scaffoldKey.currentState?.openEndDrawer();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +132,6 @@ class _MonitoringPageState extends State<MonitoringPage> {
                         leading: Icon(Icons.history),
                         title: Text('History'),
                       ),
-                      // 추가적인 메뉴 아이템들...
                     ],
                   ),
                 ),
@@ -134,6 +163,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(25.0),
                           ),
+                          child: graphUrl.isNotEmpty
+                              ? Image.network(graphUrl)
+                              : Container(),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -143,7 +175,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           color: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            '', // 빈 문자열
+                            '총 탐지된 객체 수: $totalBoundingBoxes',
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 16),
                           ),
@@ -154,6 +186,16 @@ class _MonitoringPageState extends State<MonitoringPage> {
                 ),
               ),
             ],
+          ),
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: EdgeInsets.only(top: 24.0, right: 8.0),
+              child: IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: _openEndDrawer,
+              ),
+            ),
           ),
         ],
       ),
