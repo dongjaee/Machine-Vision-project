@@ -1,11 +1,10 @@
-import 'dart:convert';
+import 'dart:io';
 import 'dart:html';
+import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 
 class ApiService {
   static const String addressIP = 'localhost:8000';
@@ -13,25 +12,18 @@ class ApiService {
   static String? uploadedVideoUrl;
   static String? outputVideoUrl;
   static String? uploadedVideoName;
-  static Map<String, String> videoTextMap = {
-    'https://osovideo.blob.core.windows.net/oso-video/conveyorprocess_output.mp4': '바운딩 박스 개수 white object: 89, yellow object: 105',
-    'https://osovideo.blob.core.windows.net/oso-video/forest_output.mp4': '바운딩 박스 개수 wild boar: 14',
-    'https://osovideo.blob.core.windows.net/oso-video/mot_output.mp4': '바운딩 박스 개수 people: 68',
-    'https://osovideo.blob.core.windows.net/oso-video/lego_output.mp4': '바운딩 박스 개수 red ball: 4',
-
-    // 필요한 URL과 텍스트를 추가로 매핑해줍니다.
-  };
-
 
   static VoidCallback? onVideoUrlChanged;
   static VoidCallback? onOutputVideoUrlChanged;
   static VoidCallback? onVideoNameChanged;
 
+  static Function(Map<String, dynamic>)? onMonitoringDataChanged;
 
   static void updateVideoUrl(String url) {
     uploadedVideoUrl = url;
     onVideoUrlChanged?.call();
 
+    //여기부분 검토 필요
     outputVideoUrl = url.replaceFirst('.mp4', '_output.mp4');
     onOutputVideoUrlChanged?.call();
   }
@@ -45,12 +37,11 @@ class ApiService {
     var uri = Uri.parse('http://$addressIP/upload_video/');
     var request = http.MultipartRequest('POST', uri)
       ..files.add(http.MultipartFile.fromBytes(
-        'video', // 서버에서 기대하는 필드 이름
+        'video',
         fileBytes,
         filename: fileName,
       ));
 
-    // 요청 전송
     var response = await request.send();
     var responseData = await http.Response.fromStream(response);
 
@@ -61,7 +52,6 @@ class ApiService {
       uploadedVideoUrl = data['videourl'];
       print(uploadedVideoUrl);
       onVideoUrlChanged?.call();
-      //return data['videourl'];
     } else {
       print('Upload failed');
     }
