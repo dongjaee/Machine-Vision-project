@@ -40,16 +40,22 @@
 
 ## 📈 ❓ How to use?
 1. 사진 및 동영상 업로드
+
+
    ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/238e7d56-51b8-4906-a626-521c3dfcfdb0)
 
 
 
-2. 제로샷 객체 탐지 결과 확인
+3. 제로샷 객체 탐지 결과 확인
+
+   
    ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/06b64d97-f663-4c9b-af52-6f7bdd956612)
 
    
    
-3. 데이터 시각화를 통한 활용
+5. 데이터 시각화를 통한 활용
+
+   
    ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/15223db6-0dc1-4361-a88f-3a920f25d82c)
 
 
