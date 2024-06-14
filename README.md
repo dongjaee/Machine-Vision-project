@@ -1,4 +1,4 @@
-# ZERO-SHOT Learning 기반 모니터링 플랫폼 제작 프로젝트
+# ZERO-SHOT 기반 모니터링 플랫폼 제작 프로젝트
 
 
 
