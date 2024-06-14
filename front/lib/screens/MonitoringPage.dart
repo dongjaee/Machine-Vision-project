@@ -15,6 +15,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
   List<Map<String, String>> uploadedVideos = [];
   late String graphUrl;
   late int totalBoundingBoxes;
+  late String videoName;
 
 
 
@@ -23,6 +24,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
     super.initState();
     graphUrl = widget.result['graph_data'];
     totalBoundingBoxes = widget.result['total_bounding_boxes'];
+    videoName = graphUrl.split('/').last.split('_result.png').first;
     print('MonitoringPage initialized with graphUrl: $graphUrl and totalBoundingBoxes: $totalBoundingBoxes');
   }
 
@@ -154,27 +156,78 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 50),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Result Summary',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          '< 탐지 영상 이름 : $videoName >',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                          ),
+                        ),
+                      ),
                       Center(
                         child: Container(
                           height: screenHeight * 0.65, // 높이 조정
-                          width: screenWidth * 0.65, // 너비 조정
+                          width: screenWidth * 0.8, // 너비 조정
                           child: graphUrl.isNotEmpty
                               ? Image.network(graphUrl)
                               : Container(),
                         ),
                       ),
-                      SizedBox(height: 20),
-                      Center(  // Center 위젯으로 감싸기
-                        child: Container(
-                          width: screenWidth * 0.55,
-                          color: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            '총 탐지된 객체 수: $totalBoundingBoxes',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0), // 그래프와 텍스트 사이 여백 줄이기
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'x축 : 시간',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                              SizedBox(width: 60),
+                              Text(
+                                'Y축 : 탐지된 객체 수',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                            ],
                           ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.warning, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text(
+                              '임계값 : 0.5',
+                              style: TextStyle(fontSize: 21),
+                            ),
+                            SizedBox(width: 60),
+                            Icon(Icons.people, color: Colors.blue),
+                            SizedBox(width: 8),
+                            Text(
+                              '총 탐지된 객체 수: $totalBoundingBoxes',
+                              style: TextStyle(fontSize: 21),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Center(
+                        child: Text(
+                          '다양한 임계값 설정을 통해 객체 상태를 판별하세요!',
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
                         ),
                       ),
                     ],
