@@ -157,12 +157,8 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       SizedBox(height: 50),
                       Center(
                         child: Container(
-                          height: screenHeight * 0.55, // 높이
-                          width: screenWidth * 0.55, // 너비
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
+                          height: screenHeight * 0.65, // 높이 조정
+                          width: screenWidth * 0.65, // 너비 조정
                           child: graphUrl.isNotEmpty
                               ? Image.network(graphUrl)
                               : Container(),
