@@ -56,6 +56,7 @@
 **5. 데이터 시각화를 통한 활용**
 
    
-   ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/15223db6-0dc1-4361-a88f-3a920f25d82c)
+   ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/dc97c09b-9b51-49c6-8f0e-954b601019a4)
+
 
 
