@@ -46,14 +46,14 @@
 
 
 
-**3. 제로샷 객체 탐지 결과 확인**
+**2. 제로샷 객체 탐지 결과 확인**
 
    
    ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/06b64d97-f663-4c9b-af52-6f7bdd956612)
 
    
    
-**5. 데이터 시각화를 통한 활용**
+**3. 데이터 시각화를 통한 활용**
 
    
    ![image](https://github.com/dongjaee/Machine-Vision-project/assets/154665357/dc97c09b-9b51-49c6-8f0e-954b601019a4)
